@@ -5,10 +5,10 @@ const _$$ = (q, elm) => (elm ? elm : document).querySelectorAll(q);
 
 class MyClass {
     hi () {
-        
+
     }
 }
 
 _$('button').addEventListener('click', evt => {
-    console.log('click4');
+    console.log('click1');
 })

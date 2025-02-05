@@ -18,6 +18,8 @@ import autoprefixer from "gulp-autoprefixer";
 import imagemin from "gulp-imagemin";
 import htmlmin from "gulp-htmlmin";
 import newer from "gulp-newer";
+import browsersync from "browser-sync";
+import destclean from "gulp-dest-clean";
 
 const paths = {
   styles: {
@@ -29,7 +31,7 @@ const paths = {
     dest: "dist/js/",
   },
   imgs: {
-    src: "src/img/**/*",
+    src: "src/img/**",
     dest: "dist/img/",
   },
   html: {
@@ -39,7 +41,7 @@ const paths = {
 };
 
 gulp.task("clean", () => {
-  return del(["dist/*", '!dist/img/']);
+  return del(["dist/*", "!dist/img/"]);
 });
 
 gulp.task("styles", () => {
@@ -64,7 +66,8 @@ gulp.task("styles", () => {
       })
     )
     .pipe(sourcemaps.write("."))
-    .pipe(gulp.dest(paths.styles.dest));
+    .pipe(gulp.dest(paths.styles.dest))
+    .pipe(browsersync.stream());
 });
 
 gulp.task("scripts", () => {
@@ -82,28 +85,37 @@ gulp.task("scripts", () => {
     .pipe(uglify())
     .pipe(concat("main.min.js"))
     .pipe(sourcemaps.write("."))
-    .pipe(gulp.dest(paths.scripts.dest));
+    .pipe(gulp.dest(paths.scripts.dest))
+    .pipe(browsersync.stream());
 });
 
 gulp.task("imagemin", () => {
   return gulp
     .src(paths.imgs.src, { encoding: false })
+    .pipe(destclean(paths.imgs.dest))
     .pipe(newer(paths.imgs.dest))
     .pipe(
       imagemin({
         //        progressive: true
       })
     )
-    .pipe(gulp.dest(paths.imgs.dest));
+    .pipe(gulp.dest(paths.imgs.dest))
+    .pipe(browsersync.stream());
 });
 
 gulp.task("htmlmin", () => {
-  return gulp.src(paths.html.src)
+  return gulp
+    .src(paths.html.src)
     .pipe(htmlmin({ collapseWhitespace: true }))
-    .pipe(gulp.dest(paths.html.dest));
+    .pipe(gulp.dest(paths.html.dest))
+    .pipe(browsersync.stream());
 });
 
 gulp.task("watch", () => {
+  browsersync.init({
+    server: paths.html.dest,
+    browser: "chrome"
+  });
   gulp.watch(paths.styles.src, gulp.series("styles"));
   gulp.watch(paths.scripts.src, gulp.series("scripts"));
   gulp.watch(paths.imgs.src, gulp.series("imagemin"));
@@ -112,7 +124,11 @@ gulp.task("watch", () => {
 
 gulp.task(
   "build",
-  gulp.series("clean", gulp.parallel("htmlmin", "styles", "scripts", "imagemin"), "watch")
+  gulp.series(
+    "clean",
+    gulp.parallel("htmlmin", "styles", "scripts", "imagemin"),
+    "watch"
+  )
 );
 
 gulp.task("default", gulp.series("build"));
