@@ -21,6 +21,12 @@ import newer from "gulp-newer";
 import browsersync from "browser-sync";
 import destclean from "gulp-dest-clean";
 import pug from "gulp-pug";
+import gulpIf from "gulp-if";
+
+global.app = {
+  isBuild: process.argv.includes("--build"),
+  isDev: !process.argv.includes("--build"),
+}
 
 const paths = {
   styles: {
@@ -84,7 +90,7 @@ gulp.task("scripts", () => {
     .pipe(sourcemaps.init())
     .pipe(
       babel({
-        presets: ["@babel/env"],
+        // presets: ["@babel/env"],
       })
     )
     .pipe(uglify())
@@ -119,8 +125,10 @@ gulp.task("htmlmin", () => {
 gulp.task("pug", () => {
   return gulp
     .src(paths.pug.src)
-    .pipe(pug({}))
-    .pipe(htmlmin({ collapseWhitespace: true }))
+    .pipe(pug({
+      pretty: true
+    }))
+    .pipe(gulpIf(app.isBuild, htmlmin({ collapseWhitespace: true })))
     .pipe(gulp.dest(paths.html.dest))
     .pipe(browsersync.stream());
 });
