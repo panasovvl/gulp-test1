@@ -1,0 +1,26 @@
+mixin block1(block_name)
+    .block1= block_name
+        .block1__inner
+            block
+
+doctype html
+html(lang="en")
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport" content="width=device-width, initial-scale=1.0")
+        title Document
+    body
+        include pug/1-header.pug
+        h1 Hello, World! 1
+        .main.
+            Test 1
+            Test 2
+        .main2 Test 3
+        ul.list
+            each url, text in {'Главная': 'index', 'Настройки': 'sett', 'Корзина': 'cart'}
+                li.list__item
+                    a.list__link(href="/" + url + ".html")= text
+        +block1("Блок 1").
+            Содержание блока 1
+        +block1("Блок 2").
+            Содержание блока 2

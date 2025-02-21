@@ -20,6 +20,7 @@ import htmlmin from "gulp-htmlmin";
 import newer from "gulp-newer";
 import browsersync from "browser-sync";
 import destclean from "gulp-dest-clean";
+import pug from "gulp-pug";
 
 const paths = {
   styles: {
@@ -36,6 +37,10 @@ const paths = {
   },
   html: {
     src: "src/**/*.html",
+    dest: "dist/",
+  },
+  pug: {
+    src: "src/**/*.pug",
     dest: "dist/",
   },
 };
@@ -111,6 +116,15 @@ gulp.task("htmlmin", () => {
     .pipe(browsersync.stream());
 });
 
+gulp.task("pug", () => {
+  return gulp
+    .src(paths.pug.src)
+    .pipe(pug({}))
+    .pipe(htmlmin({ collapseWhitespace: true }))
+    .pipe(gulp.dest(paths.html.dest))
+    .pipe(browsersync.stream());
+});
+
 gulp.task("watch", () => {
   browsersync.init({
     server: paths.html.dest,
@@ -120,13 +134,14 @@ gulp.task("watch", () => {
   gulp.watch(paths.scripts.src, gulp.series("scripts"));
   gulp.watch(paths.imgs.src, gulp.series("imagemin"));
   gulp.watch(paths.html.src, gulp.series("htmlmin"));
+  gulp.watch(paths.pug.src, gulp.series("pug"));
 });
 
 gulp.task(
   "build",
   gulp.series(
     "clean",
-    gulp.parallel("htmlmin", "styles", "scripts", "imagemin"),
+    gulp.parallel("htmlmin", "pug", "styles", "scripts", "imagemin"),
     "watch"
   )
 );
